@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: whatsapp-campaign-outreach-agent
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: whatsapp-campaign-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /var/data/campaign.sqlite
+      - key: WHATSAPP_WEB_ENABLED
+        value: "true"
+      - key: WHATSAPP_WEB_AUTH_PATH
+        value: /var/data/.wwebjs_auth
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: GROQ_API_KEYS
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: OLLAMA_BASE_URL
+        value: http://127.0.0.1:11434
+      - key: OLLAMA_MODEL
+        value: llama3.1
