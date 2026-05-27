@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
 import { createRequire } from "node:module";
+import { accessSync, constants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { Contact, TransportState, WebTransportState } from "../shared/types.js";
@@ -320,7 +321,14 @@ export class WhatsAppWebTransport implements TransportProvider {
   }
 
   getChromePath(): string {
-    return process.env.CHROME_EXECUTABLE_PATH?.trim() || "";
+    const configuredPath = process.env.CHROME_EXECUTABLE_PATH?.trim() || "";
+    if (!configuredPath) return "";
+    try {
+      accessSync(configuredPath, constants.X_OK);
+      return configuredPath;
+    } catch {
+      return "";
+    }
   }
 
   async initialize(options: { waitMs?: number; force?: boolean } = {}): Promise<TransportState["web"]> {

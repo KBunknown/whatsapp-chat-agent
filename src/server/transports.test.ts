@@ -124,6 +124,59 @@ describe("whatsapp web transport initialization", () => {
     expect(transport.getStatus()).toMatchObject({ initialized: true, ready: false, state: "qr_ready", lastError: "" });
   });
 
+  it("falls back to Puppeteer's browser when the configured Chrome path is stale", async () => {
+    const previousChromePath = process.env.CHROME_EXECUTABLE_PATH;
+    process.env.CHROME_EXECUTABLE_PATH = "/definitely/not/google-chrome-codex-test";
+    const handlers = new Map<string, (...args: unknown[]) => void>();
+    let clientOptions: Record<string, unknown> | undefined;
+    class FakeLocalAuth {
+      constructor(public options: Record<string, unknown>) {}
+    }
+    class FakeClient {
+      constructor(options: Record<string, unknown>) {
+        clientOptions = options;
+      }
+
+      on(event: string, callback: (...args: unknown[]) => void): void {
+        handlers.set(event, callback);
+      }
+
+      async initialize(): Promise<void> {
+        await handlers.get("ready")?.();
+      }
+
+      async getChatById(): Promise<never> {
+        throw new Error("not implemented");
+      }
+
+      async getChats(): Promise<[]> {
+        return [];
+      }
+
+      async sendMessage(): Promise<{ id: { id: string } }> {
+        return { id: { id: "fake" } };
+      }
+
+      async destroy(): Promise<void> {}
+    }
+
+    try {
+      const transport = new WhatsAppWebTransport(async () => undefined, () => ({
+        Client: FakeClient,
+        LocalAuth: FakeLocalAuth
+      }));
+
+      await transport.initialize({ waitMs: 10 });
+
+      const puppeteer = clientOptions?.puppeteer as Record<string, unknown> | undefined;
+      expect(puppeteer?.executablePath).toBeUndefined();
+      expect(transport.getStatus().chromePath).toBe("");
+    } finally {
+      if (previousChromePath === undefined) delete process.env.CHROME_EXECUTABLE_PATH;
+      else process.env.CHROME_EXECUTABLE_PATH = previousChromePath;
+    }
+  });
+
   it("marks disconnects as reconnectable and blocks sends with a clear error", async () => {
     const handlers = new Map<string, (...args: unknown[]) => void>();
     class FakeLocalAuth {

@@ -42,3 +42,21 @@ Check `git status` before committing. If any secret, database, WhatsApp session,
 Use Render as a full-stack web service. The app needs a long-running Node process, SQLite persistence, Puppeteer/Chromium, and WhatsApp Web auth files, so do not deploy it as a Vercel-only serverless app.
 
 Set secrets such as `ADMIN_PASSWORD` and `GROQ_API_KEYS` in the Render dashboard, not in GitHub.
+
+Manual Render settings:
+
+```bash
+Build Command: npm ci && npm run build
+Start Command: npm start
+Health Check Path: /api/health
+```
+
+Also set:
+
+```bash
+PUPPETEER_CACHE_DIR=/opt/render/project/src/.cache/puppeteer
+```
+
+If Render reports a missing Chrome executable under `/opt/render/.cache/puppeteer`, use `Clear build cache & deploy`.
+
+If Render reports `Browser was not found at the configured executablePath (/usr/bin/google-chrome)`, remove `CHROME_EXECUTABLE_PATH` from the Render environment variables or leave it blank, then redeploy.

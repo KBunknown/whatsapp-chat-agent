@@ -48,12 +48,18 @@ Important Render environment variables:
 ```bash
 DB_PATH=/var/data/campaign.sqlite
 WHATSAPP_WEB_AUTH_PATH=/var/data/.wwebjs_auth
+PUPPETEER_CACHE_DIR=/opt/render/project/src/.cache/puppeteer
+CHROME_EXECUTABLE_PATH=
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=<set in Render>
 GROQ_API_KEYS=<set in Render>
 ```
 
 Leave `CHROME_EXECUTABLE_PATH` empty unless you intentionally install and manage Chrome yourself. Puppeteer can use its installed browser.
+
+Use `npm ci && npm run build` as the Render build command. Do not use `npm ci; npm run build`, because the semicolon continues to the build even if dependency installation fails.
+
+If you see `Browser was not found at the configured executablePath (/usr/bin/google-chrome)`, delete `CHROME_EXECUTABLE_PATH` from the Render environment variables or leave it blank, then redeploy. The app will ignore a stale local Chrome path and let Puppeteer use its installed browser.
 
 ## Security
 

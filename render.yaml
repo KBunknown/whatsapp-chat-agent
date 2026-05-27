@@ -19,6 +19,10 @@ services:
         value: "true"
       - key: WHATSAPP_WEB_AUTH_PATH
         value: /var/data/.wwebjs_auth
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/project/src/.cache/puppeteer
+      - key: CHROME_EXECUTABLE_PATH
+        value: ""
       - key: ADMIN_USERNAME
         value: admin
       - key: ADMIN_PASSWORD
